@@ -1,0 +1,13 @@
+*.aux
+*.bcf
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+
+*-eps-converted-to.pdf
+
+.idea
