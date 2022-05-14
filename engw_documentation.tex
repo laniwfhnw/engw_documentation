@@ -17,7 +17,7 @@
 
 %%% PAGE DIMENSIONS
 \usepackage[a4paper, top=2cm, bottom=2.2cm, left=3cm, right=3cm, includeheadfoot, headheight=31pt,
-    headsep=0pt]{geometry} % to change the page dimensions
+  headsep=0pt]{geometry} % to change the page dimensions
 \geometry{a4paper} % or letterpaper (US) or a5paper or....
 \usepackage{multicol}
 \setlength{\headheight}{35pt}
@@ -44,7 +44,6 @@
 \usepackage{lipsum}
 \usepackage{tabularx}
 \usepackage{calculator}
-\bibliography{refs}
 % These packages are all incorporated in the memoir class to one degree or another...
 
 % Changes date format to YYYY-MM-DD
@@ -57,14 +56,14 @@
 \makeatletter
 % At the end write the current value back to the `.aux` file
 \AtEndDocument{
-    \immediate\write\@auxout{
-        \string\setcounter{versionNumber}{\number\value{versionNumber}}
-    }
+  \immediate\write\@auxout{
+    \string\setcounter{versionNumber}{\number\value{versionNumber}}
+  }
 }
 \makeatother
 % Step the counter at the beginning
 \AtBeginDocument{
-    \stepcounter{versionNumber}
+  \stepcounter{versionNumber}
 }
 
 % Title page info
@@ -83,9 +82,13 @@
 \usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
 \pagestyle{fancy} % options: empty , plain , fancy
 \renewcommand{\headrulewidth}{0pt} % customise the layout...
-\lhead{}\chead{}\rhead{\includegraphics[height=0.88\headheight]{res/fhnw_ht_10mm.eps}}
-\lfoot{v0.0.\theversionNumber\ \textcolor{gray}{\today\ \currenttime}}\cfoot{\thepage\ /
-        {\hypersetup{hidelinks}\pageref{LastPage}}}\rfoot{Lani Wagner}
+\lhead{}
+\chead{}
+\rhead{\includegraphics[height=0.88\headheight]{res/fhnw_ht_10mm.eps}}
+\lfoot{v0.0.\theversionNumber\ \textcolor{gray}{\today\ \currenttime}}
+\cfoot{Lani Wagner}
+\rfoot{\thepage\ /
+        {\hypersetup{hidelinks}\pageref{LastPage}}}
 
 %%% SECTION TITLE APPEARANCE
 \usepackage{sectsty}
@@ -108,74 +111,98 @@
 \usepackage{enumitem}% http://ctan.org/pkg/enumitem
 \setlist[itemize]{noitemsep, topsep=0pt}
 
+\newcommand{\rilb}{Rotating Index Load Balancer}
 
 %%% END Article customizations
 
 %%% The "real" document content comes below...
 
 \begin{document}
-    \VerbatimFootnotes
-    \clearpage\maketitle
-    \thispagestyle{empty}
-    \begin{abstract}
-        This document contains the documentation written for the implementation of a rotating index load balancer described in the pre-production specification found on \href{https://github.com/laniwfhnw/engw_specification/blob/main/engw_specification.pdf}{GitHub}\footnote{see \url{https://github.com/laniwfhnw/engw_specification/blob/main/engw_specification.pdf}.}.
-    \end{abstract}
-    {\hypersetup{hidelinks} \tableofcontents}
-    \newpage
+  \begin{titlepage}
+    \begin{center}
+      \vspace*{1cm}
+
+      \textbf{\Huge \rilb}
+
+      \vspace{1.5cm}
+      \hrule
+      \vspace{1cm}
+
+      {\Large Documentation}
+
+      \vspace{1.5cm}
+
+
+      \begin{figure}[H]
+          \centering
+          \includegraphics[width=.9\linewidth, keepaspectratio]{res/rilb_visualization}
+          \label{fig:rilb-vis-title}
+      \end{figure}
+
+      \vfill
+
+      \includegraphics[width=0.4\textwidth]{res/fhnw_ht_10mm}
+
+      \vspace{0.8cm}
+
+      Lani Wagner
+
+      \today\ \currenttime
+
+    \end{center}
+  \end{titlepage}
+
+  {\hypersetup{hidelinks} \tableofcontents}
+  \newpage
+
+
+  \section{Introduction}
+
+  This document serves as a documentation for the written implementation of a rotating index load balancer as described in the pre-production specification found at \url{https://github.com/laniwfhnw/engw_specification/blob/main/engw_specification.pdf}.
+
+  % explain what the purpose of this document is
+
+
+  \section{Use Cases}
+
+  % explain for what use cases this library should be used.
+
+
+  \section{Rotating Index Load Balancer Concept}
+
+  % explain what a rilb is
+
+
+  \section{Library Use}
+
+  % specify how a developer can use the capabilities of the library
+
+  \subsection{Environment}
+
+  % explain on what hardware and OS the library is intended to run on
+
+  \subsection{Use Cases}
+
+  % explain in what cases it makes sense to use a rilb and where a rilb is not well used
 
 
 
-    \section{Introduction}
-
-    % explain what the purpose of this document is
+  \newpage
 
 
+  \section{Glossary}
 
-    \section{Use Cases}
-
-    % explain for what use cases this library should be used.
-
-
-
-    \section{Rotating Index Load Balancer Concept}
-
-    % explain what a rilb is
-
-
-
-    \section{Library Use}
-
-    % specify how a developer can use the capabilities of the library
-
-
-    \subsection{Environment}
-
-    % explain on what hardware and OS the library is intended to run on
-
-
-    \subsection{Use Cases}
-
-    % explain in what cases it makes sense to use a rilb and where a rilb is not well used
-
-
-
-    \newpage
-
-
-
-    \section{Glossary}
-
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{p{.3\linewidth} | p{.6\linewidth}}
-            \textbf{Term} & \textbf{Definition}
-            \\\hline
-            &
-        \end{tabular}
-        \caption{Glossary definitions.}
-        \label{tab:glossary}
-    \end{table}
-    \printbibliography[heading=bibintoc]
-    \listoffigures
-    \listoftables
+  \begin{table}[H]
+    \centering
+    \begin{tabular}{p{.3\linewidth} | p{.6\linewidth}}
+      \textbf{Term} & \textbf{Definition}
+      \\\hline
+      &
+    \end{tabular}
+    \caption{Glossary definitions.}
+    \label{tab:glossary}
+  \end{table}
+  \printbibliography[heading=bibintoc]
+  \listoffigures
+  \listoftables
 \end{document}
