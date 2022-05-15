@@ -43,6 +43,7 @@
 \usepackage{amsmath, amsthm, amssymb, amsfonts}
 \usepackage{lipsum}
 \usepackage{tabularx}
+\usepackage[most]{tcolorbox}
 \usepackage{calculator}
 % These packages are all incorporated in the memoir class to one degree or another...
 
@@ -85,7 +86,7 @@
 \lhead{}
 \chead{}
 \rhead{\includegraphics[height=0.88\headheight]{res/fhnw_ht_10mm.eps}}
-\lfoot{v0.0.\theversionNumber\ \textcolor{gray}{\today\ \currenttime}}
+\lfoot{v1.0.\theversionNumber\ \textcolor{gray}{\today\ \currenttime}}
 \cfoot{Lani Wagner}
 \rfoot{\thepage\ /
     {\hypersetup{hidelinks}\pageref{LastPage}}}
@@ -114,6 +115,14 @@
 \newcommand{\rilb}{Rotating Index Load Balancer}
 \newcommand{\hidelinks}[1]{{\hypersetup{hidelinks}#1}}
 \newcommand{\figref}[1]{\hidelinks{\hyperref[#1]{Figure \ref{#1}}}}
+\newcommand{\ai}[1]{\textcolor{red}{$A_1$}}
+\newcommand{\aii}[1]{\textcolor{green!50!black}{$A_2$}}
+\newcommand{\aiii}[1]{\textcolor{blue!70!black}{$A_3$}}
+\newcommand{\fn}[1]{\tcbox[on line, boxsep=0pt, arc=1pt, outer arc=1pt,
+  left=1pt,
+  right=1pt,
+  top=0pt,
+  bottom=0pt, colback=black!15!white, colframe=white]{#1}}
 
 %%% END Article customizations
 
@@ -163,31 +172,31 @@
 
 
 
-  \section{\rilb\ Concept}\label{sec:2}
+  \section{\rilb{} Concept}\label{sec:2}
 
-  To explain what the idea of a \rilb\ is, it's easiest to first explain what problem it solves with a simple example. Imagine a filesystem like the one shown in \figref{fig:rilb-vis}. We want to provide a service that accepts analysis requests. These analysis requests are run over the system to calculate a result. The result is then returned to the requester. You can imagine this service being an API, so we don't know when or how many of the requests we're going to get.
+  To explain what the idea of a \rilb{} is, it's easiest to first explain what problem it solves with a simple example. Imagine a filesystem like the one shown in \figref{fig:rilb-vis}. We want to provide a service that accepts analysis requests. These analysis requests are run over the system to calculate a result. The result is then returned to the requester. You can imagine this service being an API, so we don't know when or how many of the requests we're going to get.
 
   The simplest solution, once we get a request, would be to go through all of the files for one request and complete the analysis. Once all of the files have been included in the result we return the result. This works fine when we don't have many requests coming in and the analyses don't need a long time to complete. We are doing a lot of the same operations multiple times, though. Every time we read a file for one analysis and then another and then another we are performing the same operation. If the analysis requests come in at a similar time, we can read the file once to avoid expensive I/O operations.
 
-  The idea of reducing the amount of read operations $m \cdot n$ (where $m$ is the number of analyses that each need to read $n$ files) to $n$ read operations is the main idea of a \rilb. Imagine an index that points to a file at all times, and that can rotate and point to all files in the filesystem. Every time it points to a file it reads that file and passes that data on to all the analyses. Once a request for an anlysis reaches the service, the service keeps track of the first file that analysis received. The service knows that the analysis has looked at all files when the index once again points to the file that the analysis started with.
+  The idea of reducing the amount of read operations $m \cdot n$ (where $m$ is the number of analyses that each need to read $n$ files) to $n$ read operations is the main idea of a \rilb{}. Imagine an index that points to a file at all times, and that can rotate and point to all files in the filesystem. Every time it points to a file it reads that file and passes that data on to all the analyses. Once a request for an anlysis reaches the service, the service keeps track of the first file that analysis received. The service knows that the analysis has looked at all files when the index once again points to the file that the analysis started with.
 
   \begin{figure}[H]
     \centering
     \includegraphics[width=.99\linewidth, keepaspectratio]{res/rilb_visualization}
-    \caption{Visualization of a \rilb\ traversion through an example filesystem.}
+    \caption{Visualization of a \newcommand{\ai}[1]{\textcolor{red}{#1}}{} traversion through an example filesystem.}
     \label{fig:rilb-vis}
   \end{figure}
 
-  Let me me walk you through an example execution using the filesystem in \figref{fig:rilb-vis}. We are working with 16 different configuration files. We want to analyze these files in three different ways. The first analysis $A_1$ determines the average length of the files (in lines). The second analysis $A_2$ determines the longest line in any of the files. Finally, the third analysis $A_3$ determines the size of those files (in bytes) that are two levels deeper than the root. At first the service isn't doing anything because there are no active analyses running. Once the first analysis $A_1$ is requested, the index starts rotating and the file contents are analysed in $A_1$. The files \texttt{a.conf}, \texttt{b.conf}, \texttt{c.conf}, and \texttt{d.conf} are analysed without any other requests coming in. The request for analysis $A_2$ reaches the service right before the index points to \texttt{e.conf}, so \texttt{e.conf} is the first file $A_2$ analyses. $A_3$ comes in when the
-  index points to \texttt{g.conf}. The contents of \texttt{g.conf} and \texttt{h.conf} are sent to all three analyses. The files \texttt{i.conf} through \texttt{p.conf} are only sent to analyses $A_1$ and $A_2$, since analysis $A_3$ doesn't care about those files. As soon as the index points to \texttt{a.conf} the second time the service knows that analysis $A_1$ has been completed and it returns the result. The rotation continues without interruption until the index points to \texttt{e.conf}, at which point the result of analysis $A_2$ is returned. Now only analysis $A_3$ remains. It is still in the queue and receives the file contents of \texttt{e.conf} and \texttt{f.conf}. The result of analysis $A_3$ is returned as soon as the index points to \texttt{g.conf}. Now there are no more analyses in the queue, so the index rests at \texttt{g.conf} until another request arrives. The final state of the service is depicted in \figref{fig:rilb-vis}.
+  Let me me walk you through an example execution using the filesystem in \figref{fig:rilb-vis}. We are working with 16 different configuration files. We want to analyze these files in three different ways. The first analysis \ai{} determines the average length of the files (in lines). The second analysis \aii{} determines the longest line in any of the files. Finally, the third analysis \aiii{} determines the size of those files (in bytes) that are two levels deeper than the root. At first the service isn't doing anything because there are no active analyses running. Once the first analysis \ai{} is requested, the index starts rotating and the file contents are analysed in \ai{}. The files \fn{a.conf}, \fn{b.conf}, \fn{c.conf}, and \fn{d.conf} are analysed without any other requests coming in. The request for analysis \aii{} reaches the service right before the index points to \fn{e.conf}, so \fn{e.conf} is the first file \aii{} analyses. \aiii{} comes in when the
+  index points to \fn{g.conf}. The contents of \fn{g.conf} and \fn{h.conf} are sent to all three analyses. The files \fn{i.conf} through \fn{p.conf} are only sent to analyses \ai{} and \aii, since analysis \aiii{} doesn't care about those files. As soon as the index points to \fn{a.conf} the second time the service knows that analysis \ai{} has been completed and it returns the result. The rotation continues without interruption until the index points to \fn{e.conf}, at which point the result of analysis \aii{} is returned. Now only analysis \aiii{} remains. It is still in the queue and receives the file contents of \fn{e.conf} and \fn{f.conf}. The result of analysis \aiii{} is returned as soon as the index points to \fn{g.conf}. Now there are no more analyses in the queue, so the index rests at \fn{g.conf} until another request arrives. The final state of the service is depicted in \figref{fig:rilb-vis}.
 
-  This example obviously doesn't illustrate what happens in certain special cases. For example we didn't consider the case that \texttt{g.conf} could get deleted during the rotation of $A_3$, so with our current approach we would not know when to stop. For more detail on the exact implementation and how special cases are handled please take a look at the pre-production specification of the library\footnote{\url{https://github.com/laniwfhnw/engw_specification/blob/main/engw_specification.pdf}\label{fn:pp-spec}}.
+  This example obviously doesn't illustrate what happens in certain special cases. For example we didn't consider the case that \fn{g.conf} could get deleted during the rotation of \aiii, so with our current approach we would not know when to stop. For more detail on the exact implementation and how special cases are handled please take a look at the pre-production specification of the library\footnote{\url{https://github.com/laniwfhnw/engw_specification/blob/main/engw_specification.pdf}\label{fn:pp-spec}}.
 
 
 
   \section{Library Use}\label{sec:3}
 
-  For a detailed description of the library interface please take a look at chapter two (``Design'') of the \rilb pre-production specificiation\hyperref[fn:pp-spec]{\footnotemark[1]}.
+  For a detailed description of the library interface please take a look at chapter two (``Design'') of the \rilb{} pre-production specificiation\hyperref[fn:pp-spec]{\footnotemark[1]}.
 
 
   \subsection{Environment}\label{sec:3.1}
