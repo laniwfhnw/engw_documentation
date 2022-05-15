@@ -178,7 +178,8 @@
     \label{fig:rilb-vis}
   \end{figure}
 
-  Let me me walk you through an example execution using the filesystem in \figref{fig:rilb-vis}. We are working with 16 different configuration files. We want to analyze these files in three different ways. The first analysis $A_1$ determines the average length of the files (in lines). The second analysis $A_2$ determines the longest line in any of the files. Finally, the third analysis $A_3$ determines the size of those files (in bytes) that are two levels deeper than the root. At first the service isn't doing anything because there are no active analyses running. Once the first analysis $A_1$ is requested, the index starts rotating and the file contents are analysed in $A_1$. The files \texttt{a.conf}, \texttt{b.conf}, \texttt{c.conf}, and \texttt{d.conf} are analysed without any other requests coming in. The request for analysis $A_2$ reaches the service right before the index points to \texttt{e.conf}, so \texttt{e.conf} is the first file $A_2$ analyses. $A_3$ comes in when the index points to \texttt{g.conf}. The contents of \texttt{g.conf} and \texttt{h.conf} are sent to all three analyses. The files \texttt{i.conf} through \texttt{p.conf} are only sent to analyses $A_1$ and $A_2$, since analysis $A_3$ doesn't care about those files. As soon as the index points to \texttt{a.conf} the second time the service knows that analysis $A_1$ has been completed and it returns the result. The rotation continues without interruption until the index points to \texttt{e.conf}, at  which point the result of analysis $A_2$ is returned. Now only analysis $A_3$ remains. It is still in the queue and receives the file contents of \texttt{e.conf} and \texttt{f.conf}. The result of analysis $A_3$ is returned as soon as the index points to \texttt{g.conf}. Now there are no more analyses in the queue, so the index rests at \texttt{g.conf} until another request arrives. The  final state of the service is depicted in \figref{fig:rilb-vis}.
+  Let me me walk you through an example execution using the filesystem in \figref{fig:rilb-vis}. We are working with 16 different configuration files. We want to analyze these files in three different ways. The first analysis $A_1$ determines the average length of the files (in lines). The second analysis $A_2$ determines the longest line in any of the files. Finally, the third analysis $A_3$ determines the size of those files (in bytes) that are two levels deeper than the root. At first the service isn't doing anything because there are no active analyses running. Once the first analysis $A_1$ is requested, the index starts rotating and the file contents are analysed in $A_1$. The files \texttt{a.conf}, \texttt{b.conf}, \texttt{c.conf}, and \texttt{d.conf} are analysed without any other requests coming in. The request for analysis $A_2$ reaches the service right before the index points to \texttt{e.conf}, so \texttt{e.conf} is the first file $A_2$ analyses. $A_3$ comes in when the
+  index points to \texttt{g.conf}. The contents of \texttt{g.conf} and \texttt{h.conf} are sent to all three analyses. The files \texttt{i.conf} through \texttt{p.conf} are only sent to analyses $A_1$ and $A_2$, since analysis $A_3$ doesn't care about those files. As soon as the index points to \texttt{a.conf} the second time the service knows that analysis $A_1$ has been completed and it returns the result. The rotation continues without interruption until the index points to \texttt{e.conf}, at which point the result of analysis $A_2$ is returned. Now only analysis $A_3$ remains. It is still in the queue and receives the file contents of \texttt{e.conf} and \texttt{f.conf}. The result of analysis $A_3$ is returned as soon as the index points to \texttt{g.conf}. Now there are no more analyses in the queue, so the index rests at \texttt{g.conf} until another request arrives. The final state of the service is depicted in \figref{fig:rilb-vis}.
 
   This example obviously doesn't illustrate what happens in certain special cases. For example we didn't consider the case that \texttt{g.conf} could get deleted during the rotation of $A_3$, so with our current approach we would not know when to stop. For more detail on the exact implementation and how special cases are handled please take a look at the pre-production specification of the library\footnote{\url{https://github.com/laniwfhnw/engw_specification/blob/main/engw_specification.pdf}\label{fn:pp-spec}}.
 
@@ -191,12 +192,14 @@
 
   \subsection{Environment}\label{sec:3.1}
 
-  This library is ideally suited to run on a system with multiple cores. Every analysis can run on a separate thread as soon as the file contents of the current file have been loaded into memory. Ideally you would provide a system with as many cores as you have analyses running on that system. For the ideal execution time you want to run this library on a system with enough RAM to run the application itself, hold the result of analyses and the largest file in the filesystem that the analyses are supposed to analyze.
+  Since this library is written in Java it can run on any operating system that can run the JVM. This library is ideally suited to run on a system with multiple cores. Every analysis can run on a separate thread as soon as the file contents of the current file have been loaded into memory. Ideally you would provide a system with as many cores as you have analyses running on that system. For the ideal execution time you want to run this library on a system with enough RAM to run the application itself, hold the result of analyses and the largest file in the filesystem that the analyses are supposed to analyze.
 
 
   \subsection{Use Cases}\label{sec:3.2}
 
-  % explain for what use cases this library should be used.
+  This library is very well suited for a service that receives a lot of requests that need to analyze the same files over and over and over again with slightly different parameters each time. It can also be used in a very volatile filesystem (where file are getting deleted and created very regularly) although the accuracy of rotation completion and a little bit of performance will have to be sacrificed.
+
+  Absolutely no guarantees are made about the performance of this library. It is the responsibility of the developer implementing this technology to verify whether the use is appropriate.
 
 
 
@@ -211,7 +214,8 @@
     \begin{tabular}{p{.3\linewidth} | p{.6\linewidth}}
       \textbf{Term} & \textbf{Definition}
       \\\hline
-      Rotation      & A single go around the list of files considered for analysis.
+      Rotation            & A single go around the list of files considered for analysis.                                                      \\\hline
+      Rotation completion & Using the first file an analysis receives as the indication that all files in the filesystem have been considered.
     \end{tabular}
     \caption{Glossary definitions.}
     \label{tab:glossary}
